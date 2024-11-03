@@ -71,3 +71,31 @@ func (pr *ProductRepository) CreateProduct(product entity.Product) (int, error) 
 
 
 }
+
+
+func (pr *ProductRepository) GetProductById(id_product int) (*entity.Product, error) {
+	query, err := pr.connection.Prepare("SELECT * FROM products WHERE = $1")
+
+	if(err != nil) {
+		fmt.Println(err)
+		return nil, err 
+	}
+
+	var produto entity.Product 
+
+	err = query.QueryRow(id_product).Scan(
+		&produto.ID,
+		&produto.Name,
+		&produto.Price,
+	)
+
+	if err != nil {
+		if(err == sql.ErrNoRows){
+			return nil, nil 
+		}
+
+		return nil, err
+	}
+	query.Close()
+	return &produto, nil
+}
