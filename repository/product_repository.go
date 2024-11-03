@@ -48,3 +48,26 @@ func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
 	return productList, nil
 
 }
+
+
+func (pr *ProductRepository) CreateProduct(product entity.Product) (int, error)  {
+	var id_product int
+	query, err := pr.connection.Prepare("INSERT INTO products(name, price) VALUES ($1, $2) RETURNING id_product")
+
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	err = query.QueryRow(product.Name, product.Price).Scan(&id_product)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	} 
+
+	query.Close()
+
+	return id_product, nil
+
+
+}
