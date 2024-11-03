@@ -1,18 +1,20 @@
-package usecase 
+package usecase
 
-
-import "go-api/entity"
+import (
+	"go-api/entity"
+	"go-api/repository"
+)
 
 type ProductUsecase struct {
-	// repository
+	repository repository.ProductRepository
 }
 
-
-func NewProductUsecase() ProductUsecase{
-	return ProductUsecase{}
+func NewProductUsecase(repo repository.ProductRepository) ProductUsecase {
+	return ProductUsecase{
+		repository: repo,
+	}
 }
 
-
-func(pu *ProductUsecase) GetProducts()([]entity.Product, error) {
-	return []entity.Product{}, nil
+func (pu *ProductUsecase) GetProducts() ([]entity.Product, error) {
+	return pu.repository.GetProducts()
 }

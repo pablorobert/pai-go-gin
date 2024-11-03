@@ -1,22 +1,20 @@
-package repository 
+package repository
 
 import (
 	"database/sql"
 	"fmt"
+	"go-api/entity"
 )
 
-
 type ProductRepository struct {
-	connection *sql.DB 
+	connection *sql.DB
 }
 
-
 func NewProductRepository(connection *sql.DB) ProductRepository {
-	return ProductRepository {
+	return ProductRepository{
 		connection: connection,
 	}
 }
-
 
 func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
 	query := "SELECT id, procut_name, price FROM product"
@@ -25,11 +23,11 @@ func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
 	if err != nil {
 		fmt.Println(err)
 
-		return []entity.Product{}, err 
+		return []entity.Product{}, err
 	}
 
-	var productList []entity.Product 
-	var productObjt	entity.Product 
+	var productList []entity.Product
+	var productObjt entity.Product
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -37,5 +35,16 @@ func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
 			&productObjt.Name,
 			&productObjt.Price,
 		)
+		if err != nil {
+			fmt.Println(err)
+			return []entity.Product{}, err
+		}
+
+		productList = append(productList, productObjt)
 	}
+
+	rows.Close()
+
+	return productList, nil
+
 }

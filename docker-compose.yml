@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: root93@
       POSTGRES_DB: go-api
     ports:
-      - 5432:54332
+      - 5432:5432
     volumes:
       - pgdata:/var/lib/postgres/data 
 
