@@ -17,7 +17,7 @@ func NewProductRepository(connection *sql.DB) ProductRepository {
 }
 
 func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
-	query := "SELECT id, procut_name, price FROM product"
+	query := "SELECT id_product, name, price FROM products"
 	rows, err := pr.connection.Query(query)
 
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"go-api/repository"
 	"go-api/usecase"
 
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +15,7 @@ func main() {
 
 	dbConnection, err := connectdb.ConnectDb()
 	if err != nil {
-	   panic(err)
+		panic(err)
 	}
 
 	ProductRepository := repository.NewProductRepository(dbConnection)
@@ -31,7 +30,7 @@ func main() {
 		})
 	})
 
-	server.GET("/products", ProductController.GetProducts)
+	server.GET("/produtos", ProductController.GetProducts)
 
 	server.Run(":9999")
 }
