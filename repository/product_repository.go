@@ -74,7 +74,7 @@ func (pr *ProductRepository) CreateProduct(product entity.Product) (int, error) 
 
 
 func (pr *ProductRepository) GetProductById(id_product int) (*entity.Product, error) {
-	query, err := pr.connection.Prepare("SELECT * FROM products WHERE = $1")
+	query, err := pr.connection.Prepare("SELECT * FROM products WHERE id_product = $1")
 
 	if(err != nil) {
 		fmt.Println(err)
