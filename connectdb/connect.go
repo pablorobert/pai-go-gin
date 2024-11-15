@@ -26,7 +26,10 @@ func ConnectDb() (*sql.DB, error) {
 	"password=%s dbname=%s sslmode=disable",
 	host, port, user, password, dbname)*/
 
-	connStr := "user=postgres dbname=go-api password=root93@ port=5432 host=localhost sslmode=disable"
+	// LEMBRANDO QUE MEU HOST-> VOU TER QUE MUDAR PARA O NOME AO QUAL
+	// EU COLOQUEI LA NO MEU DOCKER-COMPOSE, ISSO EM CASO DEU TA USANDO UM DOCKERFILE
+
+	connStr := "user=postgres dbname=go-api password=root93@ port=5432 host=go_db sslmode=disable"
 
 	db, err := sql.Open("postgres", connStr)
 
