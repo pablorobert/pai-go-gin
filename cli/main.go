@@ -2,7 +2,7 @@ package main
 
 import (
 	"go-api/connectdb"
-	"go-api/controller"
+	conteroller "go-api/controller"
 	"go-api/repository"
 	"go-api/usecase"
 
@@ -31,12 +31,10 @@ func main() {
 	})
 
 	server.GET("/produtos", ProductController.GetProducts)
-	server.POST("/produto", ProductController.CreateProduct)
+	server.POST("/produtos", ProductController.CreateProduct)
 	server.GET("/produtos/:productId", ProductController.GetProductById)
-    server.PUT("/produtos/:idProduct", ProductController.UpdateById)
-
-
-
+	server.PUT("/produtos/:idProduct", ProductController.UpdateProduct)
+	server.DELETE("/produtos/:idProduct", ProductController.DeleteProduct)
 
 	server.Run(":8080")
 }

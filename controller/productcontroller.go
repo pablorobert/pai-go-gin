@@ -28,7 +28,7 @@ func (p *productController) GetProducts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, products)
 }
 
-func (p *productController) CreateProduct(ctx *gin.Context)  {
+func (p *productController) CreateProduct(ctx *gin.Context) {
 	var product entity.Product
 	err := ctx.BindJSON(&product)
 
@@ -48,12 +48,11 @@ func (p *productController) CreateProduct(ctx *gin.Context)  {
 
 }
 
-
 func (p *productController) GetProductById(ctx *gin.Context) {
 	id_product := ctx.Param("productId")
 
-	if(id_product == ""){
-		responde := entity.Responde{
+	if id_product == "" {
+		responde := entity.Response{
 			Message: "Id do produto nao pode ser vazio!",
 		}
 		ctx.JSON(http.StatusBadRequest, responde)
@@ -62,21 +61,21 @@ func (p *productController) GetProductById(ctx *gin.Context) {
 
 	productId, err := strconv.Atoi(id_product)
 
-	if(err != nil) {
-		responde := entity.Responde {
+	if err != nil {
+		responde := entity.Response{
 			Message: "Id do produto tem que ser um valor inteiro",
 		}
 		ctx.JSON(http.StatusBadRequest, responde)
 		return
 	}
-		
+
 	product, err := p.productUsecase.GetProductById(productId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 	}
 
 	if product == nil {
-		reponse := entity.Responde{
+		reponse := entity.Response{
 			Message: "Produto nao foi encontrado na base de dados",
 		}
 		ctx.JSON(http.StatusNotFound, reponse)
@@ -86,14 +85,13 @@ func (p *productController) GetProductById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, product)
 }
 
-
-func (p *productController) UpdateById (ctx *gin.Context) {
+func (p *productController) UpdateProduct(ctx *gin.Context) {
 	// Obtém o ID do produto a partir dos parâmetros da URL
 	id_product := ctx.Param("idProduct")
-	
+
 	// Verifica se o ID é vazio ou contém apenas espaços em branco
-	if strings.TrimSpace(id_product) == ""{
-		response := entity.Responde {
+	if strings.TrimSpace(id_product) == "" {
+		response := entity.Response{
 			MessageUpdate: "Erro: o ID nao foi encontrado",
 		}
 
@@ -101,10 +99,10 @@ func (p *productController) UpdateById (ctx *gin.Context) {
 		return
 	}
 
-	// Converte o ID de string para inteiro 
+	// Converte o ID de string para inteiro
 	Idproduct, err := strconv.Atoi(id_product)
 	if err != nil {
-		response := entity.Responde {
+		response := entity.Response{
 			MessageUpdate: "Erro: o ID do produto precisa ser um numero",
 		}
 
@@ -112,26 +110,79 @@ func (p *productController) UpdateById (ctx *gin.Context) {
 		return
 	}
 
-	// Chama o caso de uso para atualizar o produto 
-	product, err := p.productUsecase.UpdateById(Idproduct)
+	// Chama o caso de uso para atualizar o produto
+	product, err := p.productUsecase.GetProductById(Idproduct)
+	// Verifica se o produto não foi encontrado
 	if err != nil {
-		// Retorna erro genérico em caso de falha no caso de uso
-		response := entity.Responde {
-			MessageUpdate: "Erro ao atualizar o produto",
-		}
-		ctx.JSON(http.StatusBadRequest, response)
-		return
-	}
-
-	// Verifica se o produto não foi encontrado 
-	if product == nil {
-		response := entity.Responde {
+		response := entity.Response{
 			MessageUpdate: "Produto nao encontrado na base de dados",
 		}
 		ctx.JSON(http.StatusNotFound, response)
 		return
 	}
 
+	var body entity.Product
+	err = ctx.ShouldBindJSON(&body)
+	if err != nil {
+		response := entity.Response{
+			MessageUpdate: "Erro ao atualizar o produto",
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	product.Name = body.Name
+	product.Price = body.Price
+
+	p.productUsecase.UpdateProduct(*product)
+
 	// Retorna o produto atualizado com sucesso
 	ctx.JSON(http.StatusOK, product)
+}
+
+func (p *productController) DeleteProduct(ctx *gin.Context) {
+	id_product := ctx.Param("idProduct")
+
+	// Verifica se o ID é vazio ou contém apenas espaços em branco
+	if strings.TrimSpace(id_product) == "" {
+		response := entity.Response{
+			Message: "Erro: o ID nao foi encontrado",
+		}
+
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Converte o ID de string para inteiro
+	Idproduct, err := strconv.Atoi(id_product)
+	if err != nil {
+		response := entity.Response{
+			Message: "Erro: o ID do produto precisa ser um numero",
+		}
+
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = p.productUsecase.GetProductById(Idproduct)
+	// Verifica se o produto não foi encontrado
+	if err != nil {
+		response := entity.Response{
+			Message: "Produto nao encontrado na base de dados",
+		}
+		ctx.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	// Chama o caso de uso para atualizar o produto
+	err = p.productUsecase.DeleteProductById(Idproduct)
+	// Verifica se o produto não foi encontrado
+	if err != nil {
+		response := entity.Response{
+			Message: "Erro ao deletar produto de Id " + id_product,
+		}
+		ctx.JSON(http.StatusNotFound, response)
+		return
+	}
+
 }
