@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"go-api/entity"
-
 )
 
 type ProductRepository struct {
@@ -24,11 +23,13 @@ func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
 	if err != nil {
 		fmt.Println(err)
 
-		return []entity.Product{}, err
+		return nil, err
 	}
 
-	var productList []entity.Product
+	productList := []entity.Product{}
 	var productObjt entity.Product
+
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -38,13 +39,11 @@ func (pr *ProductRepository) GetProducts() ([]entity.Product, error) {
 		)
 		if err != nil {
 			fmt.Println(err)
-			return []entity.Product{}, err
+			return nil, err
 		}
 
 		productList = append(productList, productObjt)
 	}
-
-	rows.Close()
 
 	return productList, nil
 
@@ -74,6 +73,8 @@ func (pr *ProductRepository) CreateProduct(product entity.Product) (int, error) 
 func (pr *ProductRepository) GetProductById(id_product int) (*entity.Product, error) {
 	query, err := pr.connection.Prepare("SELECT * FROM products WHERE id_product = $1")
 
+	defer query.Close()
+
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -89,34 +90,48 @@ func (pr *ProductRepository) GetProductById(id_product int) (*entity.Product, er
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, err
 		}
 
 		return nil, err
 	}
-	query.Close()
 	return &produto, nil
 }
 
-
-func (pr *ProductRepository) UpdateById(id_product int) (*entity.Product, error) {
+func (pr *ProductRepository) UpdateProduct(product entity.Product) (*entity.Product, error) {
 	query, err := pr.connection.Prepare("UPDATE products SET name=$1, price=$2 WHERE id_product=$3")
 
 	if err != nil {
 		fmt.Println(err)
-		return nil, err 
+		return nil, err
 	}
 
 	// fechando a comunicao com o banco
 	defer query.Close()
 
-	// Executando a atualização 
-	_, err = query.Exec("Novo name", 100.50, id_product)
+	// Executando a atualização
+	_, err = query.Exec(product.Name, product.Price, product.ID)
 	if err != nil {
-		return nil, err 
+		return nil, err
+	}
+	// Se a atualização foi bem-sucedida, não retornamos um produto, apenas confirmamos
+
+	return &product, nil
+}
+
+func (pr *ProductRepository) DeleteProductById(id_product int) error {
+	query, err := pr.connection.Prepare("DELETE FROM products WHERE id_product=$1")
+
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
 
-	// Se a atualização foi bem-sucedida, não retornamos um produto, apenas confirmamos 
+	defer query.Close()
 
-	return nil, nil
+	_, err = query.Exec(id_product)
+	if err != nil {
+		return err
+	}
+	return nil
 }
